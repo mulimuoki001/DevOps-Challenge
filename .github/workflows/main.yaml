@@ -23,8 +23,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-            python -m pip install --upgrade pip
-            pip install -r fitness_classes_booking/requirements.txt
+            python3 -m pip install --upgrade pip
+            pip3 install -r --upgrade pip
+            pip3 install -r fitness_classes_booking/requirements.txt
       - name: Run tests
         run: |
             python manage.py test
