@@ -1,0 +1,10 @@
+FROM mailhog/mailhog:latest
+
+
+# RUN apk add --no-cache curl
+
+#expose SMTP AND UI ports
+EXPOSE 1025 8025
+
+#start mailhog
+CMD ["Mailhog"]
