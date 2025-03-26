@@ -24,7 +24,6 @@ jobs:
       - name: Install dependencies
         run: |
             python3 -m pip install --upgrade pip
-            pip3 install -r --upgrade pip
             pip3 install -r fitness_classes_booking/requirements.txt
       - name: Run tests
         run: |
