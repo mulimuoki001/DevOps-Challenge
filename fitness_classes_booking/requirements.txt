@@ -1,4 +1,4 @@
-Django==4.2.20
+Django
 django-allauth==65.0.2
 django-anonymizer==0.5.1
 django-cors-headers==3.13.0
