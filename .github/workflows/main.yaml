@@ -69,4 +69,7 @@ jobs:
         run: |
           docker compose -f fitness_classes_booking/docker-compose.yaml build
           docker tag fitness_classes_booking_app:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_app:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_postgres:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_django:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_mailhog:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_nginx:latest
