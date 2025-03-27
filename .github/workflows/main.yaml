@@ -41,13 +41,13 @@ jobs:
 
       - name: Run database migrations
         run: |
-          docker compose exec -T web python manage.py migrate
+          docker compose fitness_classes_booking/docker-compose.yaml exec -T web python fitness_classes_booking/manage.py migrate
 
       - name: Run tests
         run: |
-          docker compose exec -T web python fitness_classes_booking/manage.py test
+          docker compose fitness_classes_booking/docker-compose.yaml exec -T web python fitness_classes_booking/manage.py test
 
       - name: Stop and remove containers
         if: always()
         run: |
-          docker compose down
+          docker compose fitness_classes_booking/docker-compose.yaml down
