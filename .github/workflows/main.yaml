@@ -48,7 +48,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r fitness_classes_booking/requirements.txt
       - name: Run Django Tests
         run: |
           python3 fitness_classes_booking/manage.py test
