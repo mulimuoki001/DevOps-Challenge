@@ -71,8 +71,14 @@ jobs:
 
           # Add tags
           docker tag fitness_classes_booking-postgres:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-postgres:latest
+          docker tag fitness_classes_booking-django:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-django:latest
+          docker tag fitness_classes_booking-mailhog:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-mailhog:latest
+          docker tag fitness_classes_booking-nginx:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-nginx:latest
           
           # Push
 
           docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-postgres:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-django:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-mailhog:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-nginx:latest
           
