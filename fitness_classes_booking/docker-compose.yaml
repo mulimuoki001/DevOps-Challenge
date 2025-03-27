@@ -11,7 +11,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./fitness_classes_booking:/code
+      - .:/code
     ports:
       - "8000:8000"
     networks:
