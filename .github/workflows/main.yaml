@@ -70,14 +70,9 @@ jobs:
           docker compose -f fitness_classes_booking/docker-compose.yaml build
 
           # Add tags
-          docker tag fitness_classes_booking_postgres:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_postgres:latest
-          docker tag fitness_classes_booking_django:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_django:latest
-          docker tag fitness_classes_booking_mailhog:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_mailhog:latest
-          docker tag fitness_classes_booking_nginx:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_nginx:latest
-
+          docker tag fitness_classes_booking-postgres:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-postgres:latest
+          
           # Push
 
-          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_postgres:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_django:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_mailhog:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking_nginx:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-postgres:latest
+          
