@@ -33,7 +33,7 @@ jobs:
 
       - name: Build and start services
         run: |
-          docker compose -f fitness_classes_booking/docker-compose.yml up -d --build
+          docker compose -f fitness_classes_booking/docker-compose.yaml up -d --build
 
       - name: Wait for database to be ready
         run: |
