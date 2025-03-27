@@ -30,6 +30,10 @@ jobs:
             python fitness_classes_booking/manage.py test
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      - name: Running Code Quality Checks
+        run: |
+          pip install flake8
+          flake8 fitness_classes_booking --exclude=migrations --max-line-length=120
 
       - name: Build and start services
         run: |
