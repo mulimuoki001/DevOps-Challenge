@@ -27,7 +27,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: lint
-    stategy:
+    strategy:
       max-parallel: 4
       matrix:
         python-version: ["3.12"]
