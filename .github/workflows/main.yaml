@@ -45,7 +45,7 @@ jobs:
 
       - name: Run database migrations
         run: |
-          docker compose -f fitness_classes_booking/docker-compose.yaml exec -T django python fitness_classes_booking/manage.py migrate
+          docker compose -f fitness_classes_booking/docker-compose.yaml exec -T django python /code/manage.py migrate
 
       - name: Run tests
         run: |
