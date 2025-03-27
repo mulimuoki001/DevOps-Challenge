@@ -49,7 +49,7 @@ jobs:
 
       - name: Run tests
         run: |
-          docker compose -f ./docker-compose.yaml exec -T django python fitness_classes_booking/manage.py test
+          docker compose -f ./docker-compose.yaml exec -T django python /code/manage.py test
 
       - name: Stop and remove containers
         if: always()
