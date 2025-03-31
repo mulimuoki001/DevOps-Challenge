@@ -1,0 +1,18 @@
+{% extends 'fitness_booking_app/base.html' %} {% block title %}My Bookings{%
+endblock %} {% block content %}
+<h2>Your Booked Classes</h2>
+
+{% if bookings %}
+<div class="booking-list">
+  {% for booking in bookings %}
+  <div class="booking">
+    <h3>{{ booking.fitness_class.class_name }}</h3>
+    <p>Date: {{ booking.date }}</p>
+    <p>Time: {{ booking.start_time }} - {{ booking.end_time }}</p>
+    <p>Instructor: {{ booking.fitness_class.instructor_name }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p>You have no bookings yet. Go ahead and book a class!</p>
+{% endif %} {% endblock %}

@@ -1,0 +1,8 @@
+{% extends 'fitness_booking_app/base.html' %} {% block content %}
+<h1>Logged out</h1>
+<p>You have been logged out.</p>
+<p>
+  <a href="{% url 'fitness_booking_app:login' %}">Login again</a> or
+  <a href="{% url 'fitness_booking_app:register' %}">Register</a>
+</p>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
-from django.utils.translation import gettext_lazy as _
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 # CustomUser class/model
@@ -24,13 +24,29 @@ class CustomUser(AbstractUser):
             "unique": _("A user with that username already exists."),
         },
     )
+    # Add related_name to avoid reverse accessor conflicts
+    groups = models.ManyToManyField(
+        "auth.Group",
+        related_name="customuser_set",  # Adjust related_name to avoid conflict
+        blank=True,
+        help_text=_(
+            "The groups this user belongs to. A user will get all permissions granted to each of their groups."
+        ),
+    )
+
+    user_permissions = models.ManyToManyField(
+        "auth.Permission",
+        related_name="customuser_permissions",  # Adjust related_name to avoid conflict
+        blank=True,
+        help_text=_("Specific permissions for this user."),
+    )
 
     def __str__(self):
         return self.username
 
 
 # Fitness Class model
-class FitnessClass(models.Model):
+class FitnessClasses(models.Model):
     class_name = models.CharField(max_length=100)
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -45,7 +61,7 @@ class FitnessClass(models.Model):
 # Booking model
 class Booking(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    fitness_class = models.ForeignKey(FitnessClass, on_delete=models.CASCADE)
+    fitness_class = models.ForeignKey(FitnessClasses, on_delete=models.CASCADE)
     date = models.DateField()
     booked_at = models.DateTimeField(auto_now_add=True)
     start_time = models.TimeField()

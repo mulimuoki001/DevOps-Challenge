@@ -1,0 +1,33 @@
+{% extends 'fitness_booking_app/base.html' %}
+
+{% block title %}Available Fitness Classes{% endblock %}
+
+{% block content %}
+    <h2>Available Classes</h2>
+    
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p class="message {{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="class-list">
+        {% for fitness_class in fitness_classes %}
+            <div class="fitness-class">
+                <h3>{{ fitness_class.class_name }}</h3>
+                <p>Date: {{ fitness_class.date }}</p>
+                <p>Time: {{ fitness_class.start_time }} - {{ fitness_class.end_time }}</p>
+                <p>Instructor: {{ fitness_class.instructor_name }}</p>
+                <p>Capacity: {{ fitness_class.capacity }} available</p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="fitness_class_id" value="{{ fitness_class.id }}">
+                    <button type="submit" {% if fitness_class.capacity == 0 %}disabled{% endif %}>Book Class</button>
+                </form>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
