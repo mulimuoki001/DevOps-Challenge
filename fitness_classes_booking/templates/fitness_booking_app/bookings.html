@@ -1,8 +1,18 @@
-{% extends 'fitness_booking_app/base.html' %} {% block title %}My Bookings{%
-endblock %} {% block content %}
+{% extends 'fitness_booking_app/base.html' %} {% block title %}My
+Bookings{%endblock %} {% block content %}
 <h2>Your Booked Classes</h2>
-
-{% if bookings %}
+{% if messages %}
+<div class="messages">
+  {% for message in messages %}
+  <p class="message {{ message.tags }}">{{ message }}</p>
+  {% endfor %}
+</div>
+<script>
+  setTimeout(function () {
+    $(".messages p").remove();
+  }, 3000);
+</script>
+{% endif %} {% if bookings %}
 <div class="booking-list">
   {% for booking in bookings %}
   <div class="booking">
@@ -10,6 +20,7 @@ endblock %} {% block content %}
     <p>Date: {{ booking.date }}</p>
     <p>Time: {{ booking.start_time }} - {{ booking.end_time }}</p>
     <p>Instructor: {{ booking.fitness_class.instructor_name }}</p>
+    <p>Booked at: {{ booking.booked_at }}</p>
   </div>
   {% endfor %}
 </div>

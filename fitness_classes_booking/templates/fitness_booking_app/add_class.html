@@ -1,0 +1,21 @@
+{% extends 'fitness_booking_app/base.html' %} {% block title %}Add Fitness
+Class{% endblock %} {% block content %}
+<h2 class="class-title">Add New Fitness Class</h2>
+
+{% if messages %}
+<div class="messages">
+  {% for message in messages %}
+  <p class="message {{ message.tags }}">{{ message }}</p>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="class-form">
+  <form method="POST">
+    {% csrf_token %} {{ form.as_p }}
+    <button type="submit" class="class-button">Add Class</button>
+  </form>
+</div>
+
+<a href="{% url 'fitness_booking_app:index' %}">Back to Home</a>
+{% endblock %}

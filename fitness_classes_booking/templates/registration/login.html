@@ -1,6 +1,18 @@
 {% extends 'fitness_booking_app/base.html' %} {% block content %}
 <h1 class="login-title">Login</h1>
 <div class="login-container">
+  {% if messages %}
+  <div class="messages">
+    {% for message in messages %}
+    <p class="message {{ message.tags }}">{{ message }}</p>
+    {% endfor %}
+  </div>
+  <script>
+    setTimeout(function () {
+      $(".messages p").remove();
+    }, 3000);
+  </script>
+  {% endif %}
   <form method="post">
     {% csrf_token %}
     <div>

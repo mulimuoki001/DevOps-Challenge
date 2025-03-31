@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="{% static 'styles.css' %}" />
     <link rel="stylesheet" href="{% static 'login.css' %}" />
     <link rel="stylesheet" href="{% static 'register.css' %}" />
+    <link rel="stylesheet" href="{% static 'classes_form.css' %}" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   </head>
   <body>
     <!-- Header section with navigation -->
@@ -18,7 +20,7 @@
           {% if user.is_authenticated %}
           <a href="{% url 'fitness_booking_app:index' %}">Home</a>
           <a href="{% url 'fitness_booking_app:profile' %}">Profile</a>
-          <a href="{% url 'fitness_booking_app:booking' %}">My Bookings</a>
+          <a href="{% url 'fitness_booking_app:bookings' %}">My Bookings</a>
 
           <a href="{% url 'fitness_booking_app:logout' %}">Logout</a>
 

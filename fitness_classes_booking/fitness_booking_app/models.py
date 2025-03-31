@@ -1,3 +1,6 @@
+# CustomUser class/model
+from datetime import date
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -5,14 +8,19 @@ from django.utils.translation import gettext_lazy as _
 
 # CustomUser class/model
 class CustomUser(AbstractUser):
-    phone_number = (models.CharField(max_length=15, unique=True),)
-    membership_type = (
-        models.CharField(
-            max_length=15,
-            choices=(("GOLD", "GOLD"), ("SILVER", "SILVER"), ("BRONZE", "BRONZE")),
-            default="BRONZE",
-        ),
+    phone_number = models.CharField(max_length=15, unique=True, blank=True, null=True)
+    MEMBERSHIP_CHOICES = (
+        ("GOLD", "GOLD"),
+        ("SILVER", "SILVER"),
+        ("BRONZE", "BRONZE"),
     )
+    membership_type = models.CharField(
+        max_length=15,
+        choices=MEMBERSHIP_CHOICES,
+        default="BRONZE",
+    )
+
+    # Ensure username field is still functioning correctly
     username = models.CharField(
         _("username"),
         max_length=150,
@@ -24,7 +32,8 @@ class CustomUser(AbstractUser):
             "unique": _("A user with that username already exists."),
         },
     )
-    # Add related_name to avoid reverse accessor conflicts
+
+    # Adjust related_name to avoid conflict
     groups = models.ManyToManyField(
         "auth.Group",
         related_name="customuser_set",  # Adjust related_name to avoid conflict
@@ -62,7 +71,7 @@ class FitnessClasses(models.Model):
 class Booking(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     fitness_class = models.ForeignKey(FitnessClasses, on_delete=models.CASCADE)
-    date = models.DateField()
+    date = models.DateField(default=date.today)
     booked_at = models.DateTimeField(auto_now_add=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
