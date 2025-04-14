@@ -1,0 +1,213 @@
+---
+    # 🔥 Remove all Docker APT sources (conflicting or old)
+    - name: Remove all Docker-related APT source files
+      command: "rm -f /etc/apt/sources.list.d/*docker*.list"
+
+    # 🧹 Remove old conflicting Docker keyrings if they exist
+    - name: Remove /etc/apt/keyrings/docker.gpg if it exists
+      file:
+        path: /etc/apt/keyrings/docker.gpg
+        state: absent
+
+    - name: Remove /etc/apt/sources.list.d/docker.list if it exists
+      file:
+        path: /etc/apt/sources.list.d/docker.list
+        state: absent
+
+    # 🔐 Remove all Docker GPG keys using apt-key
+    - name: Check if any Docker GPG key exists
+      command: apt-key list
+      register: apt_key_output
+      changed_when: false
+      failed_when: false
+
+    - name: Set fact if Docker GPG keys exist
+      set_fact:
+        docker_keys: "{{ apt_key_output.stdout_lines | select('search', 'docker') | list }}"
+
+    - name: Remove Docker GPG keys
+      command: apt-key del {{ item.split(' ')[1] }}
+      loop: "{{ docker_keys }}"
+      when: docker_keys | length > 0
+      register: key_remove_output
+      failed_when: false
+      changed_when: true
+
+    - name: Confirm Docker GPG keys were removed
+      debug:
+        msg: "All Docker GPG keys have been removed."
+      when: docker_keys | length > 0
+
+    # 📁 Ensure /usr/share/keyrings exists
+    - name: Ensure /usr/share/keyrings directory exists
+      file:
+        path: /usr/share/keyrings
+        state: directory
+        mode: '0755'
+
+    # 📥 Download correct Docker GPG key
+    - name: Add Docker GPG key
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /usr/share/keyrings/docker-archive-keyring.gpg
+        mode: '0644'
+
+    # 🧾 Add Docker repo with correct GPG key
+    - name: Add Docker repository with correct key
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release | lower }} stable"
+        state: present
+        filename: docker
+        update_cache: yes
+
+    # 📦 Update apt cache manually
+    - name: Update apt cache manually
+      apt:
+        update_cache: yes
+
+    # Install required packages
+    - name: Install required packages
+      apt:
+        name:
+          - python3
+          - python3-pip
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    # Check if Docker is installed
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_installed
+      ignore_errors: yes
+
+    # Install Docker if not installed
+    - name: Install Docker if not installed
+      shell: |
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sh get-docker.sh
+      when: docker_installed.failed
+      args:
+        executable: /bin/bash
+
+    # Install Docker Compose for Python
+    - name: Install Docker Compose for Python
+      pip:
+        name: docker-compose
+        state: present
+
+    # Install Docker SDK for Python
+    - name: Install Docker SDK for Python
+      pip:
+        name: docker
+        state: present
+
+    # Ensure Docker service is running
+    - name: Ensure Docker service is running
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    # Add user to docker group
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    # Ensure application directory exists
+    - name: Ensure application directory exists
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+
+    # Create .env file from template
+    - name: Create .env file from template
+      template:
+        src: "files/.env"
+        dest: "{{ app_dir }}/.env"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    # Copy Docker Compose file
+    - name: Copy Docker Compose file
+      copy:
+        src: "files/docker-compose.yaml"
+        dest: "{{ app_dir }}/docker-compose.yaml"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    # Create db directory
+    - name: Create db directory
+      file:
+        path: "{{ app_dir }}/db"
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    # Create nginx directory
+    - name: Create nginx directory
+      file:
+        path: "{{ app_dir }}/nginx"
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    # Copy db init script
+    - name: Copy db init script
+      copy:
+        src: "files/db/init.sql"
+        dest: "{{ app_dir }}/db/init.sql"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    # Copy nginx config file
+    - name: Copy nginx config file
+      copy:
+        src: "files/nginx/default.conf"
+        dest: "{{ app_dir }}/nginx/default.conf"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    # Login to Docker Hub
+    - name: Login to Docker Hub
+      docker_login:
+        username: "{{ docker_hub_username }}"
+        password: "{{ docker_hub_password }}"
+
+    # Pull Docker images from Docker Hub
+    - name: Pull Docker images from Docker Hub
+      shell: docker pull "mulimuoki/fitness_classes_booking-{{ item }}:latest"
+      loop:
+        - postgres
+        - django
+        - mailhog
+        - nginx
+
+    # Stop and remove existing containers
+    - name: Stop and remove existing containers
+      command: docker-compose down
+      args:
+        chdir: "{{ app_dir }}"
+
+    # Start Docker containers
+    - name: Start Docker containers
+      command: docker-compose up -d
+      args:
+        chdir: "{{ app_dir }}"
+
+    # Check if fitness booking containers are running
+    - name: Check if fitness booking containers are running
+      shell: docker-compose ps
+      args:
+        chdir: "{{ app_dir }}"
+      register: result
+      failed_when: result.stdout == ""

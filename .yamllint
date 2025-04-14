@@ -1,0 +1,10 @@
+---
+rules:
+  line-length:
+    max: 140  # Enforce max 80 characters per line
+    level: error
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+  trailing-spaces:
+    level: error  # Prevent trailing spaces
+  

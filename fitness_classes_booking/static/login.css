@@ -57,6 +57,7 @@ button {
   background-color: #3498db;
   color: #fff;
   border: none;
+  margin-top: 20px;
   border-radius: 4px;
   font-size: 16px;
   cursor: pointer;

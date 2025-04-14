@@ -1,0 +1,68 @@
+services:
+  django:
+    image: mulimuoki/fitness_classes_booking-django:latest
+    container_name: Devops_django_project_container
+    restart: always
+    depends_on:
+      - postgres
+      - mailhog
+    env_file:
+      - .env
+    ports:
+      - "8009:8000"
+    networks:
+      - app_network
+
+  postgres:
+    image: mulimuoki/fitness_classes_booking-postgres:latest
+    container_name: postgres_database_container
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app_network
+
+  mailhog:
+    image: mulimuoki/fitness_classes_booking-mailhog:latest
+    container_name: mailhog_email_notification_server_container
+    restart: always
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - "8027:8025"
+    networks:
+      - app_network
+
+  nginx:
+    image: mulimuoki/fitness_classes_booking-nginx:latest
+    container_name: nginx_reverse_proxy_container
+    restart: always
+    depends_on:
+      - django
+    links:
+      - django
+    ports:
+      - "8087:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./staticfiles:/django/staticfiles 
+      - ./static:/app/static
+      - ./django/media:/media
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

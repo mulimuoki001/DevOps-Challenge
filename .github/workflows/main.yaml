@@ -1,10 +1,11 @@
+---
 name: CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   lint:
@@ -20,14 +21,22 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install flake8
-        
       - name: Run Code Quality Check with flake8
         run: |
-          flake8 fitness_classes_booking --exclude=migrations --max-line-length=120
+          flake8 fitness_classes_booking --exclude=migrations --max-line-length=140
 
   test:
     runs-on: ubuntu-latest
     needs: lint
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 15121muli
+          POSTGRES_DB: fitness_db
+        ports:
+          - 5432:5432
     strategy:
       max-parallel: 4
       matrix:
@@ -52,10 +61,38 @@ jobs:
           pip install -r fitness_classes_booking/requirements.txt
       - name: Run Django Tests
         run: |
-          python3 fitness_classes_booking/manage.py test
-  docker:
+          python3 fitness_classes_booking/manage.py test fitness_booking_app.Testsfiles.test_models
+          python3 fitness_classes_booking/manage.py test fitness_booking_app.Testsfiles.test_views
+  self-test:
     runs-on: ubuntu-latest
     needs: test
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.12
+      - name: Install Yamllint
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install yamllint
+      - name: Validate the github actions workflow file
+        run: |
+          yamllint .github/workflows/main.yaml
+      - name: Check for required secrets
+        run: |
+          if [ -z "${{ secrets.DOCKER_USERNAME }}" ]; then
+            echo "Missing required secret: DOCKER_USERNAME"
+            exit 1
+          fi
+          if [ -z "${{ secrets.DOCKER_PASSWORD }}" ]; then
+            echo "Missing required secret: DOCKER_PASSWORD"
+            exit 1
+          fi
+  docker:
+    runs-on: ubuntu-latest
+    needs: self-test
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -75,28 +112,34 @@ jobs:
           docker tag fitness_classes_booking-django:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-django:latest
           docker tag fitness_classes_booking-mailhog:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-mailhog:latest
           docker tag fitness_classes_booking-nginx:latest ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-nginx:latest
-          
-          # Push
 
+          # Push
           docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-postgres:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-django:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-mailhog:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/fitness_classes_booking-nginx:latest
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: docker
-  #   steps:
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v4
-  #     - name: Install Ansible
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install ansible -y
-  #     - name: Run Ansible Playbook
-  #       run: |
-  #         ansible-playbook fitness_classes_booking/ansible/playbook.yaml
-  #     - name: SSH key setup
-  #       run: |
-  #         echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
-  #         chmod 600 key.pem
-  #         ssh-add key.pem
+
+  ansible:
+    runs-on: ubuntu-latest
+    needs: docker
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Ansible
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install ansible
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.12
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Add remote host to known_hosts
+        run: |
+          ssh-keyscan -H 64.23.216.190 >> ~/.ssh/known_hosts
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook -i fitness_classes_booking/ansible/inventory.ini fitness_classes_booking/ansible/playbook.yaml

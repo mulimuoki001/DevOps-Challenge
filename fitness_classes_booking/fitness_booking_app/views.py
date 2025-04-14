@@ -3,17 +3,29 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from django.shortcuts import redirect, render
-from django.urls import reverse
 
 from .Forms.classes_form import ClassesForm
 from .Forms.custom_user import CustomUserCreationForm
-from .models import Booking, CustomUser, FitnessClasses
+from .models import Booking, FitnessClasses
 
 
 def is_admin(user):
     return user.is_staff
+
+
+def register(request):
+    if request.method == "POST":
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get("username")
+            messages.success(request, f"Account created for {username}")
+            return redirect("fitness_booking_app:login")
+    else:
+        form = CustomUserCreationForm()
+    return render(request, "registration/register.html", {"form": form})
 
 
 @login_required
@@ -29,23 +41,6 @@ def add_class(request):
     else:
         form = ClassesForm()
     return render(request, "fitness_booking_app/add_class.html", {"form": form})
-
-
-def register(request):
-    if request.method == "POST":
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            print(user)
-            username = form.cleaned_data.get("username")
-            if CustomUser.objects.filter(username=username).exists():
-                raise ValidationError("Username already exists")
-            else:
-                messages.success(request, f"Account created for {username}")
-                return redirect(reverse("registration/login.html"))
-    else:
-        form = CustomUserCreationForm()
-    return render(request, "registration/register.html", {"form": form})
 
 
 def custom_logout(request):
@@ -94,7 +89,7 @@ def book_class(request, fitness_class_id):
     fitness_class = FitnessClasses.objects.get(id=fitness_class_id)
     if fitness_class.capacity == 0:
         messages.error(request, "Class is full")
-        return redirect("fitness_classes")
+        return redirect("fitness_booking_app:index")
     elif Booking.objects.filter(
         user=request.user, fitness_class=fitness_class
     ).exists():
@@ -114,6 +109,22 @@ def book_class(request, fitness_class_id):
         fitness_class.capacity -= 1
         fitness_class.save()
         messages.success(request, "Class booked successfully")
+        subject = "Fitness Class Booking Confirmation"
+        message = (
+            f"Dear {request.user.username},\n\n"
+            f"You have successfully booked the fitness class '{fitness_class.class_name}'.\n"
+            f"Date: {fitness_class.date}\n"
+            f"Time: {fitness_class.start_time} - {fitness_class.end_time}\n"
+            f"Instructor: {fitness_class.instructor_name}\n\n"
+            f"Best regards,\n"
+            f"Fitness Class Booking System"
+        )
+        from_email = "fitness_classes_booking@gmail.com"
+        to_email = request.user.email
+        try:
+            send_mail(subject, message, from_email, [to_email])
+        except Exception as e:
+            messages.error(request, f"Failed to send email: {str(e)}")
         return render(
             request, "fitness_booking_app/index.html", {"fitness_class": fitness_class}
         )

@@ -1,0 +1,5 @@
+---
+docker_gpg_key_url: "https://download.docker.com/linux/ubuntu/gpg"
+docker_repo_url: "https://download.docker.com/linux/ubuntu"
+docker_hub_username: "{{ lookup('env', 'DOCKER_HUB_USERNAME') }}"
+docker_hub_password: "{{ lookup('env', 'DOCKER_HUB_PASSWORD') }}"

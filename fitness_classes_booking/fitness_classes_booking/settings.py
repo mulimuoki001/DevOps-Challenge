@@ -26,11 +26,24 @@ SECRET_KEY = "django-insecure-y)r=7k2=j450a+algg&c2o(lf=7&^ftb@p9=*gd2poya)gs#90
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
+# CSRF Settings
+CSRF_COOKIE_SECURE = False  # Disable secure cookies for local development
+# settings.py
+CSRF_COOKIE_DOMAIN = [
+    "localhost",
+    "64.23.216.190",
+]  # Set to your domain or localhost for development and production
+# settings.py
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8087",
+    "https://localhost:8087",
+    "http://64.23.216.190:8087",
+    "https://64.23.216.190:8087",
+]
 
 
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -50,6 +63,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
 
 ROOT_URLCONF = "fitness_classes_booking.urls"
 
@@ -123,9 +137,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+STATIC_ROOT = "/staticfiles/"
+
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

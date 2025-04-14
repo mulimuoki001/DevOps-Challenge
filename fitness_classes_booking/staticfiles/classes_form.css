@@ -1,0 +1,22 @@
+.class-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+.class-button {
+  background-color: #272727;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-top: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  max-width: 100%;
+  color: white;
+  cursor: pointer;
+}
+.class-title {
+  color: white;
+  font-size: 28px;
+  margin-bottom: 20px;
+}

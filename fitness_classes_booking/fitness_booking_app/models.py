@@ -2,6 +2,7 @@
 from datetime import date
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -70,13 +71,18 @@ class FitnessClasses(models.Model):
 # Booking model
 class Booking(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    fitness_class = models.ForeignKey(FitnessClasses, on_delete=models.CASCADE)
+    fitness_class = models.ForeignKey(
+        FitnessClasses, on_delete=models.CASCADE, related_name="bookings"
+    )
     date = models.DateField(default=date.today)
     booked_at = models.DateTimeField(auto_now_add=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
 
     def __str__(self):
-        return (
-            f"{self.user.username} booked {self.fitness_class.name} on {self.booked_at}"
-        )
+        return f"{self.user.username} booked {self.fitness_class.class_name} on {self.booked_at}"
+
+    def save(self, *args, **kwargs):
+        if self.fitness_class.bookings.count() >= self.fitness_class.capacity:
+            raise ValidationError("Class is full")
+        super().save(*args, **kwargs)

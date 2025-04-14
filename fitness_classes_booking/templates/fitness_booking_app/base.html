@@ -19,7 +19,6 @@
         <nav>
           {% if user.is_authenticated %}
           <a href="{% url 'fitness_booking_app:index' %}">Home</a>
-          <a href="{% url 'fitness_booking_app:profile' %}">Profile</a>
           <a href="{% url 'fitness_booking_app:bookings' %}">My Bookings</a>
 
           <a href="{% url 'fitness_booking_app:logout' %}">Logout</a>

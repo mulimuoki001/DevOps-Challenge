@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/Dockerfile.django
-    container_name: django
+    container_name: Devops_django_project_container
     restart: always
     depends_on:
       - postgres
@@ -13,21 +13,22 @@ services:
     volumes:
       - .:/code
     ports:
-      - "8000:8000"
+      - "8009:8000"
     networks:
       - app_network
+
   postgres:
     build:
       context: .
       dockerfile: Dockerfiles/Dockerfile.postgresql
-    container_name: postgres_db
+    container_name: postgres_database_container
     restart: always
     env_file:
       - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "5439:5432"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 10s
@@ -40,15 +41,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/Dockerfile.mailhog
-    container_name: mailhog
+    container_name: mailhog_email_notification_server_container
     restart: always
     depends_on:
       - postgres
     env_file:
       - .env
     ports:
-      - "8025:8025"
-      - "1025:1025"
+      - "8027:8025"
     networks:
       - app_network
 
@@ -56,21 +56,25 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/Dockerfile.nginx
-    container_name: nginx
+    container_name: nginx_reverse_proxy_container
     restart: always
     depends_on:
       - django
+    links:
+      - django
     ports:
-      - "80:80"
-      - "443:443"
+      - "8087:80"
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./staticfiles:/django/staticfiles
+      - ./static:/app/static
+      - ./django/media:/media
     networks:
       - app_network
 
-
-networks: 
+networks:
   app_network:
     driver: bridge
+
 volumes:
   postgres_data:
